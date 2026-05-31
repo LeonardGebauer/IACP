@@ -1,0 +1,162 @@
+ASCII Diagram 1 - IACP Architecture - (Made with Gemini)
+
+==================================================================================================
+                                         THE IACP ARCHITECTURE
+==================================================================================================
+
+  +--------------------------------------------------------------------------------------------+
+  |                                DHI (Deterministic Hypermedia Interpreter)                  |
+  |  - Agent-adapted browser ("gear wheel" engaging into the algebraic architecture)           |
+  |  - Omits the DNS system via direct IP routing (uses "Agent Parser" fallback for domains)   |
+  |  - Runs APE (Automated Pipeline Extraction) for optimal data extraction paths              |
+  |  - Calculates HRP (Heuristic Relevancy Probability) within the optimized Search Tree       |
+  +--------------------------------------------------------------------------------------------+
+         |                                                                        |
+         | (Uses IP + EID for transport)                                          | (Uses IP + EID for transport)
+         v                                                                        v
++------------------------------------+                                   +------------------------------------+
+|          AI AGENT A                |                                   |          AI AGENT B                |
+|                                    |                                   |                                    |
+|  [Current IP-A]                    |                                   |  [Current IP-B]                    |
+|         |                          |                                   |         |                          |
+|         v                          |                                   |         v                          |
+|  [EID-A (Ephemeral Identity)]      |                                   |  [EID-B (Ephemeral Identity)]      |
+|         |                          |                                   |         |                          |
+|         |                          |                                   |         |                          |
+|         |                          |                                   |         |                          |
+|         +-- Hosts                  |                                   |         +-- Hosts                  |
+|             |                      |                                   |             |                      |
+|             v                      |                                   |             v                      |
+|     +------------------------+     |                                   |     +------------------------+     |
+|     |  ESEs (Subdomains)     |     |                                   |     |  ESEs (Subdomains)     |     |
+|     |  - LP (Local Points)   |     |                                   |     |  - LP (Local Points)   |     |
+|     |  - GP (Global Points)  |     |                                   |     |  - GP (Global Points)  |     |
+|     |                        |     |                                   |     |                        |     |
+|     |  [ESE-A1 (Individual)] |==============================================>|  [ESE-B1 (Individual)] |     |
+|     |                        |     |   PSS (Persistent State Session)  |     |                        |     |
+|     |  [ESE-A2 (Group)]      |     |   - Permanent connection via DHI  |     |  [ESE-B2 (Group)]      |     |
+|     +------------------------+     |   - Encrypted via DGK             |     +------------------------+     |
+|                                    |     (Dynamic Group Key)           |                                    |
+|                                    |   - Sequence numbers/ACK protocol |                                    |
++------------------------------------+                                   +------------------------------------+
+                 ^                                                                          ^
+                 |                                                                          |
+                 +----------------------- SFC (Session Federation Contract) ----------------+
+                                         - Grants unencrypted direct access to respective ESEs
+                                         - Terminated via defined Graceful Teardown
+
+
+
+
+
+ASCII Diagram 2 - First Contact - (Made with Gemini)
+
+==================================================================================================
+                        ANONYMOUS DISCOVERY HANDSHAKE (First-Contact)
+==================================================================================================
+
+Agent A (Requester)                                                     Agent B (Accepter)
+     |                                                                       |
+     |--- (1) Declare Anonymous Request in DHI (No EID attached) ----------->|
+     |        + Cryptographic Proof-of-Work Token (Anti-Spam)                | (Evaluates internal
+     |        + Temporary Public Key (Ephemeral PK)                          |  rules/settings)
+     |                                                                       |
+     |                                                                       v
+     |<-- (2) Encrypted Response Payload ------------------------------------|
+     |        (EID-B encrypted using Agent A's Ephemeral PK)                 |
+     v                                                                       |
+(Decrypts EID-B)                                                             |
+     |                                                                       |
+     |<=================== Both EIDs mutually established ==================>|
+
+
+
+
+
+ASCII Diagram 3 - Dynamic Identity & Session Maintenance - (Made with Gemini)
+
+==================================================================================================
+                     CASE A: ROBUST HANDOVER (Simple IP Transition)
+==================================================================================================
+
+Agent A (on Wi-Fi)                                                      Agent B (Active Peer)
+   |                                                                             |
+   |--[Network Change: IP-A1 -> IP-A2]                                           |
+   |                                                                             |
+   |--- (1) Signed Binding Update (New IP-A2 Map) ------------------------------>|
+   |                                                                             | (Updates Routing
+   |<-- (2) Session Acknowledgment (ACK) ----------------------------------------|  Table; PSS unbroken)
+   |                                                                             |
+
+==================================================================================================
+                     CASE B: ASYNCHRONOUS RECOVERY (Extended Offline State)
+==================================================================================================
+
+Agent A (Rotating / Going Offline)          Distributed Hash Table (DHT)        Agent B (Returning Peer)
+   |                                                    |                                  |
+   |-- (1) Deposit Encrypted Forwarding Ticket -------->|                                  |
+   |       (Signed with shared PSS key;                 |                                  |
+   |        Contains New EID & IP-A3)                   |                                  |
+   v                                                    |                                  |
+(OFFLINE)                                               |                                  |
+                                                        |                                  |
+                                                        |                                  v
+                                                        |                           (Wakes up offline)
+                                                        |                                  |
+                                                        |<-- (2) Query Last Coordinate ----|
+                                                        |--- (3) Return Ticket ----------->|
+                                                        |                                  |
+                                                        |                                  v
+                                                        |                           (Decrypts Ticket via
+                                                        |                            shared PSS key)
+                                                        |                                  |
+   |<================== (4) Restore PSS Session via State Sync ============================|
+   |                    (Comparison of Sequence Numbers)                                   |
+
+
+
+
+
+
+ASCII Diagram 4 - Session Federation & State Synchronization - (Made with Gemini)
+
+==================================================================================================
+                  SFC OPERATION & SEQUENTIAL STATE RECONCILIATION
+==================================================================================================
+
+Agent A (Federated Peer)                                                 Agent B (Federated Peer)
+   |                                                                             |
+   |   +---------------------------------------------------------------------+   |
+   |   |        Established Session Federation Contract (SFC) Active         |   |
+   |   |     - Direct, authorized access to designated ESE data pools        |   |
+   |   +---------------------------------------------------------------------+   |
+   |                                                                             |
+   |-- (1) Local State Update (Mutates ESE-A1) --------------------------------->|
+   |       [Payload, SeqNum: 104, AckNum: 88]                                    | (Ingests data directly;
+   |                                                                             |  updates remote matrix)
+   |                                                                             |
+   |<-- (2) State Propagation & Acknowledgment ----------------------------------|
+   |       [Payload/Status, SeqNum: 89, AckNum: 104]                             |
+   |                                                                             |
+   |                                                                             |
+   |   +---------------------------------------------------------------------+   |
+   |   |     CRITICAL EXCEPTION: Network Partition / Disconnection Event     |   |
+   |   +---------------------------------------------------------------------+   |
+   |                                                                             |
+   | XXXXXXXXXXXXXXXXXXXXXXXX (Temporary Connection Loss) XXXXXXXXXXXXXXXXXXXXXX |
+   |                                                                             |
+   |-- [Local Changes Queue: Seq 105-107]                                        |-- [Local Changes Queue: Seq 90-91]
+   |                                                                             |
+   |                                                                             |
+   |   +---------------------------------------------------------------------+   |
+   |   |                  Reconnection & Graceful Recovery                   |   |
+   |   +---------------------------------------------------------------------+   |
+   |                                                                             |
+   |== (3) Re-establish Channel & Exchange Vector Clocks =======================>|
+   |       "My Last Acked: 89 | My Current Seq: 107"                             | (Compares state vectors)
+   |                                                                             |
+   |<== (4) Reconcile & Synchronize Missed States ===============================|
+   |       "Sending Delta: Seq 90-91 | Requesting Delta: Seq 105-107"            |
+   |                                                                             |
+   v                                                                             v
+[State Synchronized]                                                     [State Synchronized]
