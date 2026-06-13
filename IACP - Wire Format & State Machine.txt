@@ -1,0 +1,713 @@
+These are the package types for the IACP Wire Format:
+
+1.) DISCOVERY_REQ (DS Request Packet)
+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|Version|  Type (0x01)  | Flags |        Payload Length         | -> Common Header (4B)
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|             Target Space Coordinate (DHT Key)                 |
+|                        (SHA-256)                              |
+|                        [32 Bytes]                             |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                Ephemeral Public Key (X25519)                  |
+|                        [32 Bytes]                             |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                    Timestamp / Replay Nonce                   |
+|                          [8 Bytes]                            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                     Proof-of-Work Nonce                       |
+|                          [8 Bytes]                            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                   PoW Target Threshold                        | [4 Bytes]
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+2.) DISCOVERY_RES (DS Respond Packet)
+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|Version|  Type (0x02)  | Flags |        Payload Length         | -> Common Header (4B)
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|               Responder Ephemeral Public Key                  |
+|                        (X25519)                               |
+|                        [32 Bytes]                             |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                     AEAD Nonce / IV                           |
+|                        [12 Bytes]                             |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                      Encrypted Payload                        |
+|          (True EID [32B] + AEAD Auth Tag [16B])               |
+|                        [48 Bytes]                             |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+3.) ACCESS_TICKET_REQ (Request to get a ticket (by the Curator) to bypass PoW mechanisms)
+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|Version|  Type (0x03)  | Flags |        Payload Length         | -> Common Header (4B)
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                         Requestor EID                         |
+|                        (Ed25519 PK)                           |
+|                         [32 Bytes]                            |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|             Target Space Coordinate (DHT Key)                 |
+|                        (SHA-256)                              |
+|                         [32 Bytes]                            |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                    Timestamp / Replay Nonce                   |
+|                         [8 Bytes]                             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                                                               |
+|                     Digital Signature                         |
+|                        (Ed25519)                              |
+|                         [64 Bytes]                            |
+|                                                               |
+|                                                               |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+4.) ACCESS_TICKET_RES (Response to a request to get a "Curator Ticket")
+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|Version|  Type (0x04)  | Flags |        Payload Length         | -> Common Header (4B)
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|             Target Space Coordinate (DHT Key)                 |
+|                        (SHA-256)                              |
+|                         [32 Bytes]                            |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                         Receiver EID                          |
+|                        (Ed25519 PK)                           |
+|                         [32 Bytes]                            |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                     Expiration Timestamp                      |
+|                          [8 Bytes]                            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                                                               |
+|                   Curator Digital Signature                   |
+|                        (Ed25519)                              |
+|                         [64 Bytes]                            |
+|                                                               |
+|                                                               |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+5.) DHT_TICKET_STORE ("Making" a Forwarding Ticket before going offline)
+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|Version|  Type (0x05)  | Flags |        Payload Length         | -> Common Header (4B)
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                     Target Storage Key                        |
+|                        (SHA-256)                              | -> Key = SHA-256(EID_AGENT)
+|                         [32 Bytes]                            |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                      Target Agent EID                         |
+|                        (Ed25519 PK)                           |
+|                         [32 Bytes]                            |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                       Time-to-Live (TTL)                      | [4 Bytes]
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                        AEAD Nonce / IV                        |
+|                         [12 Bytes]                            |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                  Encrypted Forwarding Data                    |
+|                (Content + 16B AEAD Auth Tag)                  |
+|                         [36 Bytes]                            |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                                                               |
+|                    Owner Digital Signature                    |
+|                        (Ed25519)                              |
+|                         [64 Bytes]                            |
+|                                                               |
+|                                                               |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+6.) DHT_TICKET_QUERY (Query Forwarding ticket)
+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|Version|  Type (0x06)  | Flags |        Payload Length         | -> Common Header (4B)
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                     Target Storage Key                        |
+|                        (SHA-256)                              | -> Key = SHA-256(EID_AGENT)
+|                         [32 Bytes]                            |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                     Transaction ID / Nonce                    |
+|                          [8 Bytes]                            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                        Requestor EID                          |
+|                        (Ed25519 PK)                           |
+|                         [32 Bytes]                            |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+7.) DHT_TICKET_RESP (Response of the results of the query of the Forwarding Ticket)
+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|Version|  Type (0x07)  | Flags |        Payload Length         | -> Common Header (4B)
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                     Transaction ID / Nonce                    |
+|                          [8 Bytes]                            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                  Status / Error Code (4 Bytes)                |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                        AEAD Nonce / IV                        |
+|                         [12 Bytes]                            |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                  Encrypted Forwarding Data                    |
+|                (Inhalt + 16B AEAD Auth Tag)                   |
+|                         [36 Bytes]                            |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                                                               |
+|                    Owner Digital Signature                    |
+|                        (Ed25519)                              |
+|                         [64 Bytes]                            |
+|                                                               |
+|                                                               |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+8.) PSS_INIT (Initiating a PSS, starting the Contract Negotiation if they want to make a SFC)
+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|Version|  Type (0x08)  | Flags |        Payload Length         | -> Common Header (4B)
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                         Initiator EID                         |
+|                        (Ed25519 PK)                           |
+|                         [32 Bytes]                            |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |                    Note: A PSS can also be established without a SFC, then just PSS_SESSION_INIT and PSS_SESSION_ACK is needed.
+|                   Session Connection Cookie                   |
+|                          [8 Bytes]                            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|               Initial Sequence / Vector Clock                 |
+|                          [8 Bytes]                            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|             Session Capabilities & Extension Flags            | [4 Bytes]
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                                                               |
+|                  Initiator Digital Signature                  |
+|                        (Ed25519)                              |
+|                         [64 Bytes]                            |
+|                                                               |
+|                                                               |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+9.) PSS_NEG (Negotiating the SFC)
+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|Version|  Type (0x0A)  | Flags |        Payload Length         | -> Common Header (4B)
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                   Session Connection Cookie                   |
+|                          [8 Bytes]                            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|    Negotiation Turn Counter   |     Rejection Reason Flags    | -> [2B + 2B = 4 Bytes]
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                 Proposed SFC Conditions Block                 |
+|                   (Bitmask oder Contract Hash)                |
+|                          [32 Bytes]                           |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                                                               |
+|                    Sender Digital Signature                   |
+|                        (Ed25519)                              |
+|                          [64 Bytes]                           |
+|                                                               |
+|                                                               |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+10.) PSS_ACK (Accepting a PSS request with possible SFC Contract Terms)
+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|Version|  Type (0x09)  | Flags |        Payload Length         | -> Common Header (4B)
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                         Responder EID                         |
+|                        (Ed25519 PK)                           |
+|                         [32 Bytes]                            |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                   Session Connection Cookie                   |
+|                          [8 Bytes]                            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|              Responder Initial Sequence Number                |
+|                          [8 Bytes]                            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                      Agreed SFC Capabilities                  | [4 Bytes] -> Stays empty when a PSS without SFC was established.
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                                                               |
+|                  Responder Digital Signature                  |
+|                        (Ed25519)                              |
+|                         [64 Bytes]                            |
+|                                                               |
+|                                                               |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+11.) PSS_DATA_STREAM (Data Stream between ESEs)
+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|Version|  Type (0x0B)  | Flags |        Payload Length         | -> Common Header (4B)
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                   Session Connection Cookie                   |
+|                          [8 Bytes]                            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                        Sequence Number                        |
+|                          [8 Bytes]                            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                        AEAD Nonce / IV                        |
+|                         [12 Bytes]                            |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                     Encrypted ANML Payload                    |
+|             (ANML Chunk + 16B AEAD Auth Tag)                  |
+|                    [Variable Length]                          |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+12.) PSS_TEARDOWN (Ending a PSS)
+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|Version|  Type (0x0C)  | Flags |        Payload Length         | -> Common Header (4B)
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                   Session Connection Cookie                   |
+|                          [8 Bytes]                            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|        Teardown Type          |          Reason Code          | -> [2B + 2B = 4 Bytes]
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                 Proof of Malfeasance Length                   | -> [4 Bytes] (0 if Graceful)
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                                                               |
+|                    Sender Digital Signature                   |
+|                        (Ed25519)                              |
+|                          [64 Bytes]                           |
+|                                                               |
+|                                                               |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|             Optional: Proof of Malfeasance Data               |
+|                      [Variable Length,]                       |
+|                  (Only if Teardown Type = 0x0002)             |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+13.) PSS_REVOCATION_PUBLISH (PoM Ticket)
+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|Version|  Type (0x0D)  | Flags |        Payload Length         | -> Common Header (4B)
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                     Target Storage Key                        |
+|                        (SHA-256)                              | -> Key = SHA-256(Offender_EID)
+|                         [32 Bytes]                            |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                        Offender EID                           |
+|                        (Ed25519 PK)                           |
+|                         [32 Bytes]                            |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                 Proof of Malfeasance Length                   | [4 Bytes]
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                                                               |
+|                   Reporter Digital Signature                  |
+|                        (Ed25519)                              |
+|                         [64 Bytes]                            |
+|                                                               |
+|                                                               |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                 Proof of Malfeasance Data                     |
+|            (Faulty packet(s) or Equivocation Proof)           |
+|                     [Variable Length]                         |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+[The "Architecture" of the Wire Format for each packet was made by human. The ASCII-Diagrams were made by Gemini and edited by Human.]
+
+Here is a Wire Map that sums up the packet relationships:
+
+========================================================================================== (Made with Copilot - Edited by Human)
+                   INTERNET AGENT COMMUNICATION PROTOCOL (IACP) WIRE MAP                  
+==========================================================================================
+
+      [ PHASE 1: DISCOVERY SPACE ]
+      +-----------------------------------------------------------------------------+
+      |  [0x01] DISCOVERY_REQ   =====> Target Coordinates & PoW Puzzles             |
+      |         |                                                                   |
+      |         v (Peer Found & Validated)                                          |
+      |  [0x02] DISCOVERY_RES   <===== Contains Encrypted EID & X25519 Key          |
+      +-------------------+---------------------------------------------------------+
+                          |
+         +----------------+----------------+
+         | (Bypass PoW?)                   | (Agent Offline?)
+         v                                 v
+      [ PHASE 2: CURATOR TICKETS ]      [ PHASE 3: DHT FORWARDING ]
+      +----------------------------+    +-------------------------------------------+
+      | [0x03] ACCESS_TICKET_REQ   |    | [0x05] DHT_TICKET_STORE  -> Save Fwd Data |
+      |        |                   |    |                                           |
+      |        v (Curator Signed)  |    | [0x06] DHT_TICKET_QUERY  -> Poll Ticket   |
+      | [0x04] ACCESS_TICKET_RES   |    |                                           |
+      +-------------------+--------+    | [0x07] DHT_TICKET_RESP   -> Return Data   |
+                          |             +---------------------+---------------------+
+                          |                                   |
+                          +----------------+------------------+
+                                           |
+                                           v (Establish Direct Channel)
+      [ PHASE 4: PERSISTENT STATE SESSION (PSS) LIFECYCLE ]
+      +-----------------------------------------------------------------------------+
+      |                                                                             |
+      |       [0x08] PSS_INIT  ================> Starts Session & Exchange Cookies  |
+      |              |                                                              |
+      |              +-----------------------+  (If Session Federation Contract)    |
+      |              |                       v                                      |
+      |              |               [0x0A] PSS_NEG  <===> Symmetric SFC            |
+      |              |                       |             Condition Negotiation    |
+      |              v (Standard Init)       |                                      |
+      |              |                       v                                      |
+      |       [0x09] PSS_ACK   <============-+  Finalizes Handshake & ESE Alignment |
+      |              |                                                              |
+      |              v                                                              |
+      |    +--> [0x0B] PSS_DATA_STREAM <---+   Continuous, asymmetric Push-Sync     |
+      |    |          |                    |   of encrypted ANML Chunks across ESEs |
+      |    +----------+                    +--+                                     |
+      |               |                                                             |
+      |               v (Session Termination Event)                                 |
+      |       [0x0C] PSS_TEARDOWN =============> RAM Cryptographic Wipe             |
+      |               |                        - Graceful: Task Completed           |
+      |               |                        - Emergency: Proof of Malfeasance    |
+      |               v (If breach of protocol)                                     |
+      |       [0x0D] PSS_REVOCATION_PUBLISH                                         |
+      +-----------------------------------------------------------------------------+
+
+Here is one example:
+
+Initiator Agent (Alice)                                    Responder Agent (Bob) (Made with Copilot)
+       |                                                             |
+       | ------------ [0x08] PSS_INIT -----------------------------> |
+       |              - Cookie: Alice_Cookie                         |
+       |              - Extension Flags: SFC_REQUESTED = 1           |
+       |                                                             |
+       | <----------- [0x0A] PSS_NEG (Turn 1) ---------------------- |
+       |              - Cookie: Alice_Cookie                         |
+       |              - Proposed SFC Block: Bitmask/Contract Hash    |
+       |                (Bob's initial data disclosure offer)        |
+       |                                                             |
+ [Evaluation]                                                        |
+       | ------------ [0x0A] PSS_NEG (Turn 2) ---------------------> |
+       |              - Cookie: Alice_Cookie                         |
+       |              - Proposed SFC Block: Counter-Hash             |
+       |                (Alice's modified capabilities request)      |
+       |                                                             |
+       |                                                         [Accepted]
+       | <----------- [0x09] PSS_ACK ------------------------------- |
+       |              - Cookie: Alice_Cookie                         |
+       |              - Agreed SFC Capabilities: Final Token         |
+       |                                                             |
+ ===================== SFC CHANNEL ESTABLISHED =======================
+       |                                                             |
+       | <======== [0x0B] PSS_DATA_STREAM (Encrypted ANML) ========> |
+       |                  - Real-time ESE Synchronization            |
+
+Now to the State Transitions:
+
+1.) FSM (Because of LaTex a backlash is added to all words that would be symbols)
+
+To establish verifiable security bounds against resource exhaustion, the initial IACP 
+Discovery and Session Allocation subsystem is formalized as a Deterministic Finite 
+Automaton (DFA), denoted by the 5-tuple:
+
+                     M_disc = (S, \Sigma, \delta, s_0, F)
+
+Where the constituent sets and mappings are defined as follows:
+
+1. S is the finite set of non-overlapping session allocation states:
+   S = { LISTEN, VALIDATING_POW, AWAIT_IDENTITY, PSS_NEGOTIATING, ESTABLISHED }
+
+2. \Sigma is the input alphabet consisting of network events and cryptographic triggers:
+   \Sigma = { 
+     RX_DISCOVERY_REQ, 
+     POW_FAILURE, 
+     POW_SUCCESS, 
+     RX_PSS_INIT_(SFC=1), 
+     RX_PSS_INIT_(SFC=0), 
+     IDENTITY_TIMEOUT 
+   }
+
+3. s_0 \in S is the unique, zero-allocation initial state:
+   s_0 = LISTEN
+
+4. F \subseteq S is the set of final accepting operational states:
+   F = { PSS_NEGOTIATING, ESTABLISHED }
+
+5. \delta: S \times \Sigma \rightarrow S is the deterministic state transition function, 
+   defined by the following exact mappings:
+   
+   \delta(LISTEN,          RX_DISCOVERY_REQ)    = VALIDATING_POW
+   \delta(VALIDATING_POW,  POW_FAILURE)         = LISTEN
+   \delta(VALIDATING_POW,  POW_SUCCESS)         = AWAIT_IDENTITY
+   \delta(AWAIT_IDENTITY,  RX_PSS_INIT_(SFC=1)) = PSS_NEGOTIATING
+   \delta(AWAIT_IDENTITY,  RX_PSS_INIT_(SFC=0)) = ESTABLISHED
+   \delta(AWAIT_IDENTITY,  IDENTITY_TIMEOUT)    = LISTEN
+
+Resource Invariant Guarantee:
+By formalizing the alphabet mapping such that \delta(LISTEN, RX_DISCOVERY_REQ) yields a 
+state transition where \Delta RAM = 0, the automaton proves that zero-state context is 
+allocated before verified PoW validation. State elevation to memory-retaining structures 
+is bound strictly to the execution of \delta(VALIDATING_POW, POW_SUCCESS).
+
+2.) Zero-Allocation State
+
++-----------------------+-----------------------+-----------------------+------------------------------------------------------------+
+| Current State         | Event (Input)         | Next State            | Action Executed & Resource Invariant                       |
++-----------------------+-----------------------+-----------------------+------------------------------------------------------------+
+| LISTEN                | RX_DISCOVERY_REQ      | VALIDATING_POW        | - Pass nonce directly from network buffer to crypto engine |
+|                       | (Anonymous packet)    |                       | - Invariant: Delta RAM = 0 (No session state allocated)    |
++-----------------------+-----------------------+-----------------------+------------------------------------------------------------+
+| VALIDATING_POW        | POW_FAILURE           | LISTEN                | - Drop packet immediately                                  |
+|                       | (Invalid nonce or     |                       | - Increment local network interface spam counter           |
+|                       | expired timestamp)    |                       | - Invariant: Delta RAM = 0                                 |
++-----------------------+-----------------------+-----------------------+------------------------------------------------------------+
+| VALIDATING_POW        | POW_SUCCESS           | AWAIT_IDENTITY        | - Allocate minimal session context in protected RAM        |
+|                       | (Valid cryptographic  |                       | - Generate ephemeral X25519 keypair for identity handshake |
+|                       | proof-of-work)        |                       | - Transmit DISCOVERY_RES (0x02) with encrypted true EID    |
+|                       |                       |                       | - Invariant: Delta RAM = sizeof(SessionContext)            |
++-----------------------+-----------------------+-----------------------+------------------------------------------------------------+
+| AWAIT_IDENTITY        | RX_PSS_INIT           | PSS_NEGOTIATING       | - Verify Ed25519 signature of Initiator on Session Cookie  |
+|                       | (SFC_REQUESTED = 1    |                       | - Decrypt and validate Alice's long-lived identity         |
+|                       | in Extension Flags)   |                       | - Invariant: Advance to symmetric contract negotiation     |
++-----------------------+-----------------------+-----------------------+------------------------------------------------------------+
+| AWAIT_IDENTITY        | RX_PSS_INIT           | ESTABLISHED           | - Verify Ed25519 signature of Initiator on Session Cookie  |
+|                       | (SFC_REQUESTED = 0    |                       | - Bypass negotiation; open raw persistent channel directly |
+|                       | in Extension Flags)   |                       | - Invariant: Session context elevated to fully active      |
++-----------------------+-----------------------+-----------------------+------------------------------------------------------------+
+| AWAIT_IDENTITY        | IDENTITY_TIMEOUT      | LISTEN                | - Evict unverified ephemeral session state from memory     |
+|                       | (No valid PSS_INIT    |                       | - Cryptographically wipe context buffer                    |
+|                       | within 500ms window)  |                       | - Invariant: Delta RAM reverted to 0 (Mitigates DoS/Spam)  |
++-----------------------+-----------------------+-----------------------+------------------------------------------------------------+
+
+3.) Dynamic Circuit Breaker
+
++-----------------+-----------------------+-----------------+------------------------------------------------------------+
+| Current State   | Event (Input)         | Next State      | Action Executed & Resource Protection                      |
++-----------------+-----------------------+-----------------+------------------------------------------------------------+
+| CLOSED          | RX_REQUEST_WITH_TICKET| CLOSED          | - Allow PoW bypass via valid curator-issued access ticket  |
+|                 |                       |                 | - Continuously update local telemetry and traffic metrics  |
++-----------------+-----------------------+-----------------+------------------------------------------------------------+
+| CLOSED          | TRAFFIC_SPIKE         | OPEN            | - Autonomously trip the breaker immediately                |
+|                 | (Anomalous peak in    |                 | - Suspend PoW bypass privileges for target namespace tree  |
+|                 | namespace sub-tree)   |                 | - Isolate sub-tree without waiting for DHT propagation     |
++-----------------+-----------------------+-----------------+------------------------------------------------------------+
+| OPEN            | RX_REQ_FROM_FLAGGED   | OPEN            | - Strip bypass privileges from incoming tickets            |
+|                 | (Request from flagged |                 | - Enforce maximum PoW crypto puzzles on transport layer    |
+|                 | namespace tree branch)|                 | - Filter and drop excess packets directly at link level    |
++-----------------+-----------------------+-----------------+------------------------------------------------------------+
+| OPEN            | COOLDOWN_TIMEOUT      | CLOSED          | - Re-enable regular protocol PoW bypass mechanisms         |
+|                 | (Traffic returns to   |                 | - Reset local telemetry baselines and anomaly counters     |
+|                 | baseline limits)      |                 |                                                            |
++-----------------+-----------------------+-----------------+------------------------------------------------------------+
+| OPEN            | RX_ACCESS_TICKET      | OPEN      | - Drop all access tickets originating from this sub-tree         |
+|                 | (Valid ticket parsed  |           | - Defensively block potential ticket-flooding attacks            |
+|                 |  during open state)   |           | - Invariant: Force max PoW difficulty for all discovery          |
++-----------------+-----------------------+-----------+------------------------------------------------------------------+
+
+4.) Ongoing Session & Continuity (PSS & SFC Lifecycle FSM)
+
++-----------------+-----------------------+-----------------+------------------------------------------------------------+
+| Current State   | Event (Input)         | Next State      | Action Executed & Cryptographic Invariant                  |
++-----------------+-----------------------+-----------------+------------------------------------------------------------+
+| PSS_NEGOTIATING | SFC_EFFECTIVE         | ESTABLISHED     | - Activate Session Federation Contract (SFC) parameters    |
+|                 | (Contract signed &    |                 | - Unlock direct Ephemeral State Environment (ESE) access   |
+|                 | validated by peers)   |                 | - Invariant: Shared state bounded by SFC parameters        |
++-----------------+-----------------------+-----------------+------------------------------------------------------------+
+| ESTABLISHED     | RX_OUT_OF_ORDER       | ANOMALY_FLAGGED | - Hold payload in volatile isolation buffer                |
+|                 | (Historical payload or|                 | - Initiate deterministic sequence number validation        |
+|                 | gap in packet index)  |                 | - Invariant: Core session state remains unmutated          |
++-----------------+-----------------------+-----------------+------------------------------------------------------------+
+| ANOMALY_FLAGGED | ANOMALY_CLEARED       | ESTABLISHED     | - Flush isolation buffer and process missing packets       |
+|                 | (Valid sequence re-syn|                 | - Resume standard PSS transaction ledger updates           |
+|                 | chronization achieved)|                 | - Invariant: State vector alignment restored               |
++-----------------+-----------------------+-----------------+------------------------------------------------------------+
+| ESTABLISHED/    | HEARTBEAT_FAIL        | SESSION_        | - Immediately freeze active ESE data pool access channels  |
+| ANOMALY_FLAGGED | (Invalid signature or | COMPROMISED     | - Terminate cryptographic key-ratcheting schedule          |
+|                 | unauthorized access)  |                 | - Invariant: Prevent silent exfiltration of context        |
++-----------------+-----------------------+-----------------+------------------------------------------------------------+
+| ESTABLISHED     | QUIC_CONN_CLOSE       | DISCONNECTED    | - Cache last verified state hash and sequence parameters   |
+|                 | (Unexpected transport |                 | - Start asynchronous session preservation timer            |
+|                 | drop or timeout)      |                 | - Invariant: Volatile memory retained until timer expiry   |
++-----------------+-----------------------+-----------------+------------------------------------------------------------+
+| DISCONNECTED    | PEER_RECONNECT        | RECONCILING     | - Initiate validation of Sequence State Vectors            |
+|                 | (Re-authenticating via|                 | - Request missing transaction log delta payloads           |
+|                 | short-lived tokens)   |                 | - Invariant: Establish zero-knowledge state comparison     |
++-----------------+-----------------------+-----------------+------------------------------------------------------------+
+| RECONCILING     | STATE_VECTORS_MATCH   | ESTABLISHED     | - Re-integrate missed transactions atomically              |
+|                 | (Delta log application|                 | - Transition back to active data sharing processing        |
+|                 | successful)           |                 | - Invariant: Complete state continuity without corruption  |
++-----------------+-----------------------+-----------------+------------------------------------------------------------+
+
+5.) Currator Quarantine
+
++-----------------------+-----------------------+-----------------------+------------------------------------------------------------+
+| Current State         | Event (Input)         | Next State            | Action Executed & Resource Invariant                       |
++-----------------------+-----------------------+-----------------------+------------------------------------------------------------+
+| ESTABLISHED           | RX_REVOCATION_TICKET  | CURATOR_QUARANTINE    | - Isolate active context from consensus/routing path       |
+|                       | (Validated PoM match) |                       | - Invariant: Suspend data transfer, retain session memory  |
++-----------------------+-----------------------+-----------------------+------------------------------------------------------------+
+| CURATOR_QUARANTINE    | QUARANTINE_EXPIRED    | EVICTED_PEER          | - Fully tear down SFC without sending normal termination   |
+|                       | (No counter-proof)    |                       | - Blacklist Offender EID locally; wipe session context     |
+|                       |                       |                       | - Invariant: Delta RAM = -sizeof(SessionContext)           |
++-----------------------+-----------------------+-----------------------+------------------------------------------------------------+
+| CURATOR_QUARANTINE    | RX_COUNTER_PROOF      | ESTABLISHED           | - Verify cryptographic mitigation / false-positive ticket  |
+|                       | (Valid signature)     |                       | - Restore full routing/communication privileges            |
+|                       |                       |                       | - Invariant: RAM context restored to normal operating mode |
++-----------------------+-----------------------+-----------------------+------------------------------------------------------------+
+| EVICTED_PEER          | CLEANUP_COMPLETE      | LISTEN                | - Flush network interface state for this coordinate        |
+|                       | (Internal trigger)    |                       | - Invariant: Delta RAM is fully zeroed                     |
++-----------------------+-----------------------+-----------------------+------------------------------------------------------------+
+
+6.) The 4-Stage Security & Revocation Model
+
++---------------------+-----------------------+---------------------+------------------------------------------------------------+
+| Current State       | Event (Input)         | Next State          | Action Executed & Network-Wide Propagation                 |
++---------------------+-----------------------+---------------------+------------------------------------------------------------+
+| SESSION_COMPROMISED | VALIDATE_ANOMALY      | EMERGENCY_          | - Instantly sever unencrypted ESE data pool permissions    |
+|                     | (Malicious behavior   | REVOCATION          | - Force rotation of all Dynamic Group Keys (DGK)           |
+|                     | deterministically proven)                   | - Append offender EID to local Agent Parser blacklist      |
++---------------------+-----------------------+---------------------+------------------------------------------------------------+
+| EMERGENCY_          | POM_GENERATED         | PROPAGATING_WARN    | - Construct Revocation Ticket with signed cryptographic PoM|
+| REVOCATION          | (Proof of Malfeasance |                     | - Inject ticket into DHT at attacker's routing coordinates |
+|                     | block fully compiled) |                     | - Invariant: Publicly audit-proof evidence of breach       |
++---------------------+-----------------------+---------------------+------------------------------------------------------------+
+| ACTIVE_CURATOR      | CERT_CONTRADICTION    | QUARANTINE          | - Trigger 24-hour global curator privilege suspension      |
+| (Curator Node Only) | (Conflicting signed   |                     | - Revoke ticket-issuing capabilities network-wide          |
+|                     | claims discovered)    |                     | - Force peer sub-spaces to enter verification mode         |
++---------------------+-----------------------+---------------------+------------------------------------------------------------+
+| QUARANTINE          | MALFEASANCE_PROVEN    | PERMANENT_          | - Execute definitive net-wide privilege de-authorization   |
+| (Curator Node Only) | (Deliberate double-   | DECAPITATION        | - Commit curator EID to permanent global blocklist         |
+|                     | signing verified)     |                     | - Invariant: Lifetime exclusion from consensus layers      |
++---------------------+-----------------------+---------------------+------------------------------------------------------------+
+| QUARANTINE          | QUARANTINE_TIMEOUT    | ACTIVE_CURATOR      | - Restore curator cryptographic routing capabilities       |
+| (Curator Node Only) | (Grace period expiry  | (Curator Node Only) | - Re-verify active long-lived EID credentials in DHT       |
+|                     | without hard evidence)|                     | - Resume standard access ticket processing and signing     |
++---------------------+-----------------------+---------------------+------------------------------------------------------------+
+| ACTIVE_CURATOR/     | CURATOR_FLAGGED       | AUTOMATED_EMERGENCY_| - Initiate autonomous detachment from compromised tree     |
+| QUARANTINE          | (Parent curator enters| MIGRATION           | - Execute hot-docking protocol onto designated backup root |
+| (Sub-Space Nodes)   | compromised state)    |                     | - Invariant: Prevent cascading infrastructure collapse     |
++---------------------+-----------------------+---------------------+------------------------------------------------------------+
+
+7.) The General IACP Workflow
+
++-----------------------+-----------------------+-----------------------+------------------------------------------------------------+
+| Current State         | Event (Input)         | Next State            | Action Executed & Parser Lifecycle Optimization            |
++-----------------------+-----------------------+-----------------------+------------------------------------------------------------+
+| INPUT_RECEIVED        | INITIATE_RESOLVE      | RESOLVING_            | - Accept inbound URI target string                         |
+|                       |                       | INFRASTRUCTURE        | - Dispatch deterministic DNS SRV queries                   |
++-----------------------+-----------------------+-----------------------+------------------------------------------------------------+
+| RESOLVING_            | DNS_SUCCESS           | WELL_KNOWN_           | - Extract infrastructure routing targets                   |
+| INFRASTRUCTURE        |                       | EVALUATION            | - Construct target HTTP standard connection parameters     |
++-----------------------+-----------------------+-----------------------+------------------------------------------------------------+
+| WELL_KNOWN_           | ENDPOINT_UNREACHABLE  | PROBLEM_CACHING       | - Log complete error context into persistent local cache   |
+| EVALUATION            | (Connection timeout/  | (Final Error State)   | - Short-circuit execution loop to save runtime resources   |
+|                       | 404 Status Code)      |                       | - Invariant: Prevent parser execution hangs / lockups      |
++-----------------------+-----------------------+-----------------------+------------------------------------------------------------+
+| WELL_KNOWN_           | ENDPOINT_RESPONSIVE   | LINK_HEADER_SNIFFING  | - Parse HTTP response headers for explicit ANML pointers   |
+| EVALUATION            | (Status 200 OK)       |                       | - Verify cryptographic manifest signatures if present      |
++-----------------------+-----------------------+-----------------------+------------------------------------------------------------+
+| LINK_HEADER_SNIFFING  | PARSE_COMPLETE        | SWITCH_POINT          | - Evaluate content flags against active user constraints   |
+|                       |                       |                       | - Determine execution path based on resource requirements  |
++-----------------------+-----------------------+-----------------------+------------------------------------------------------------+
+| SWITCH_POINT          | HEAVY_MEDIA_DETECTED  | LEGACY_PATH_          | - Hand off request context to system browser engine        |
+|                       | (Requires layout/heavy| EXECUTION             | - Isolate execution in legacy sandbox container            |
+|                       | DOM rendering engine) | (Final State)         | - Terminate native fast-path parsing                       |
++-----------------------+-----------------------+-----------------------+------------------------------------------------------------+
+| SWITCH_POINT          | PURE_DATA_STREAM      | NATIVE_ANML_          | - Ingest raw information stream directly into agent LLM    |
+|                       | (Structured text-only | INGESTION             | - Bypass layout, CSS, and javascript engine execution      |
+|                       | semantic stream)      | (Final State)         | - Invariant: Maximum throughput, zero rendering overhead   |
++-----------------------+-----------------------+-----------------------+------------------------------------------------------------+
